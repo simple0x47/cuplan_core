@@ -1,4 +1,4 @@
-package cuplancore
+package pkg
 
 type Error struct {
 	errorKind string
