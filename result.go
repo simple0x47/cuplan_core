@@ -1,4 +1,4 @@
-package main
+package cuplancore
 
 type Result[OkType any, ErrorType any] struct {
 	ok   OkType

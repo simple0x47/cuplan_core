@@ -1,4 +1,4 @@
-package main
+package cuplancore
 
 import (
 	"github.com/stretchr/testify/assert"
