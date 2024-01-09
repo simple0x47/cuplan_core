@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/simpleg-eu/cuplan-core/pkg/core"
+	"os"
 	"os/exec"
 )
 
@@ -26,6 +27,10 @@ func NewBitwardenProvider(accessToken string) *BitwardenProvider {
 	b.accessToken = accessToken
 
 	return b
+}
+
+func GetDefaultSecretsManagerAccessToken() string {
+	return os.Getenv("SECRETS_MANAGER_ACCESS_TOKEN")
 }
 
 func (b BitwardenProvider) Get(secretId string) core.Result[string, core.Error] {
