@@ -3,7 +3,7 @@ package secret
 import (
 	"encoding/json"
 	"fmt"
-	core "github.com/simpleg-eu/cuplan-core/pkg"
+	"github.com/simpleg-eu/cuplan-core/pkg/core"
 	"os/exec"
 )
 
