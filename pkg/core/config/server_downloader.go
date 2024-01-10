@@ -4,19 +4,22 @@ import (
 	"context"
 	"fmt"
 	"github.com/simpleg-eu/cuplan-core/pkg/core"
+	"go.uber.org/zap"
 	"io"
 	"net/http"
 	"time"
 )
 
 type ServerDownloader struct {
+	logger *zap.Logger
 	// TODO: Can expire, a renewal mechanism must be developed.
 	accessToken     string
 	downloadTimeout time.Duration
 }
 
-func NewServerDownloader(accessToken string, downloadTimeout time.Duration) *ServerDownloader {
+func NewServerDownloader(logger *zap.Logger, accessToken string, downloadTimeout time.Duration) *ServerDownloader {
 	s := new(ServerDownloader)
+	s.logger = logger
 	s.accessToken = accessToken
 	s.downloadTimeout = downloadTimeout
 
@@ -48,7 +51,12 @@ func (s ServerDownloader) Download(host string, stage string, environment string
 		return core.Err[[]byte, core.Error](*core.NewError(core.ConfigurationRetrievalFailure, fmt.Sprintf("failed to make GET request: %s", err)))
 	}
 
-	defer response.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			s.logger.Warn("Failed to close response's body.", zap.String("err", err.Error()))
+		}
+	}(response.Body)
 
 	if response.StatusCode != http.StatusOK {
 		return core.Err[[]byte, core.Error](*core.NewError(core.ConfigurationRetrievalFailure, fmt.Sprintf("received an unexpected status code %d", response.StatusCode)))

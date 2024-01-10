@@ -6,6 +6,7 @@ import (
 	"github.com/simpleg-eu/cuplan-core/pkg/core/secret"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
+	"go.uber.org/zap"
 	"gopkg.in/yaml.v3"
 	"os"
 	"runtime"
@@ -47,8 +48,8 @@ func (s *ServerDownloaderTestSuite) SetupTest() {
 	}
 
 	secretsProvider := secret.NewBitwardenProvider(secret.GetDefaultSecretsManagerAccessToken())
-
-	s.Downloader = NewServerDownloader(secretsProvider.Get(s.Config.AccessTokenSecret).Unwrap(), time.Second*time.Duration(s.Config.DownloadTimeoutInSeconds))
+	logger, _ := zap.NewDevelopment()
+	s.Downloader = NewServerDownloader(logger, secretsProvider.Get(s.Config.AccessTokenSecret).Unwrap(), time.Second*time.Duration(s.Config.DownloadTimeoutInSeconds))
 }
 
 func (s *ServerDownloaderTestSuite) TestServerDownloader_Download_ReturnsBytes() {
