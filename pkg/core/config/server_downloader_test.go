@@ -5,6 +5,7 @@ import (
 	"github.com/simpleg-eu/cuplan-core/pkg/core"
 	"github.com/simpleg-eu/cuplan-core/pkg/core/secret"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 	"gopkg.in/yaml.v3"
 	"os"
 	"runtime"
@@ -21,36 +22,17 @@ type Config struct {
 	DownloadTimeoutInSeconds int    `yaml:"DownloadTimeoutInSeconds"`
 }
 
-var testDataPath string
-var config Config
-var downloader Downloader
-
-func TestMain(m *testing.M) {
-	setup()
-
-	exitCode := m.Run()
-
-	os.Exit(exitCode)
+type ServerDownloaderTestSuite struct {
+	suite.Suite
+	TestDataPath string
+	Config       Config
+	Downloader   Downloader
 }
 
-func TestServerDownloader_Download_ReturnsBytes(t *testing.T) {
-	result := downloader.Download(config.Host, config.Stage, config.Environment, config.Component)
-
-	assert.True(t, result.IsOk())
-	assert.True(t, len(result.Unwrap()) > 0, "Unexpected empty configuration package.")
-}
-
-func TestServerDownloader_Download_Fail_NonExistingHost(t *testing.T) {
-	result := downloader.Download("https://hereconfigconfiglmao.com", config.Stage, config.Environment, config.Component)
-
-	assert.False(t, result.IsOk())
-	assert.Equal(t, core.ConfigurationRetrievalFailure, result.UnwrapErr().ErrorKind())
-}
-
-func setup() {
+func (s *ServerDownloaderTestSuite) SetupTest() {
 	_, testFile, _, _ := runtime.Caller(0)
-	testDataPath = core.GetTestDataPath(testFile).Unwrap()
-	configFilePath := testDataPath + "config.yaml"
+	s.TestDataPath = core.GetTestDataPath(testFile).Unwrap()
+	configFilePath := fmt.Sprintf("%sconfig.yaml", s.TestDataPath)
 
 	configFile, err := os.ReadFile(configFilePath)
 
@@ -58,7 +40,7 @@ func setup() {
 		panic(fmt.Sprintf("Error reading configuration YAML file: %v\n", err))
 	}
 
-	err = yaml.Unmarshal(configFile, &config)
+	err = yaml.Unmarshal(configFile, &s.Config)
 
 	if err != nil {
 		panic(fmt.Sprintf("Error unmarshalling the configuration YAML file: %v\n", err))
@@ -66,5 +48,23 @@ func setup() {
 
 	secretsProvider := secret.NewBitwardenProvider(secret.GetDefaultSecretsManagerAccessToken())
 
-	downloader = NewServerDownloader(secretsProvider.Get(config.AccessTokenSecret).Unwrap(), time.Second*time.Duration(config.DownloadTimeoutInSeconds))
+	s.Downloader = NewServerDownloader(secretsProvider.Get(s.Config.AccessTokenSecret).Unwrap(), time.Second*time.Duration(s.Config.DownloadTimeoutInSeconds))
+}
+
+func (s *ServerDownloaderTestSuite) TestServerDownloader_Download_ReturnsBytes() {
+	result := s.Downloader.Download(s.Config.Host, s.Config.Stage, s.Config.Environment, s.Config.Component)
+
+	assert.True(s.T(), result.IsOk())
+	assert.True(s.T(), len(result.Unwrap()) > 0, "Unexpected empty configuration package.")
+}
+
+func (s *ServerDownloaderTestSuite) TestServerDownloader_Download_Fail_NonExistingHost() {
+	result := s.Downloader.Download("https://hereconfigconfiglmao.com", s.Config.Stage, s.Config.Environment, s.Config.Component)
+
+	assert.False(s.T(), result.IsOk())
+	assert.Equal(s.T(), core.ConfigurationRetrievalFailure, result.UnwrapErr().ErrorKind())
+}
+
+func TestServerDownloaderTestSuite(t *testing.T) {
+	suite.Run(t, new(ServerDownloaderTestSuite))
 }
