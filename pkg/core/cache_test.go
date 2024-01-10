@@ -14,6 +14,10 @@ type CacheTestSuite struct {
 	cache *Cache
 }
 
+func TestCacheTestSuite(t *testing.T) {
+	suite.Run(t, new(CacheTestSuite))
+}
+
 func (c *CacheTestSuite) SetupTest() {
 	c.cache = NewCache(time.Hour)
 }
@@ -37,8 +41,4 @@ func (c *CacheTestSuite) TestCache_Get_ReturnsPreviouslySetValue() {
 	cachedValue := c.cache.Get(key)
 
 	assert.Equal(c.T(), value, cachedValue.Unwrap())
-}
-
-func TestCacheTestSuite(t *testing.T) {
-	suite.Run(t, new(CacheTestSuite))
 }

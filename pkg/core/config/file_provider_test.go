@@ -15,6 +15,10 @@ type FileProviderTestSuite struct {
 	configurationFile string
 }
 
+func TestFileProviderTestSuite(t *testing.T) {
+	suite.Run(t, new(FileProviderTestSuite))
+}
+
 func (f *FileProviderTestSuite) SetupTest() {
 	_, testFile, _, _ := runtime.Caller(0)
 	testDataPath := core.GetTestDataPath(testFile).Unwrap()
@@ -55,8 +59,4 @@ func (f *FileProviderTestSuite) TestFileProvider_Get_EvenLevelKey_ReturnsExpecte
 func (f *FileProviderTestSuite) TestFileProvider_Get_CachedKey_ReturnsExpectedValue() {
 	f.TestFileProvider_Get_ReturnsExpectedValue()
 	f.TestFileProvider_Get_ReturnsExpectedValue()
-}
-
-func TestFileProviderTestSuite(t *testing.T) {
-	suite.Run(t, new(FileProviderTestSuite))
 }

@@ -30,6 +30,10 @@ type ServerDownloaderTestSuite struct {
 	Downloader   Downloader
 }
 
+func TestServerDownloaderTestSuite(t *testing.T) {
+	suite.Run(t, new(ServerDownloaderTestSuite))
+}
+
 func (s *ServerDownloaderTestSuite) SetupTest() {
 	_, testFile, _, _ := runtime.Caller(0)
 	s.TestDataPath = core.GetTestDataPath(testFile).Unwrap()
@@ -64,8 +68,4 @@ func (s *ServerDownloaderTestSuite) TestServerDownloader_Download_Fail_NonExisti
 
 	assert.False(s.T(), result.IsOk())
 	assert.Equal(s.T(), core.ConfigurationRetrievalFailure, result.UnwrapErr().ErrorKind())
-}
-
-func TestServerDownloaderTestSuite(t *testing.T) {
-	suite.Run(t, new(ServerDownloaderTestSuite))
 }

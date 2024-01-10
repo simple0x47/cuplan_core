@@ -18,6 +18,10 @@ type ZipExtractorTestSuite struct {
 	Extractor    *ZipExtractor
 }
 
+func TestZipExtractorTestSuite(t *testing.T) {
+	suite.Run(t, new(ZipExtractorTestSuite))
+}
+
 func (z *ZipExtractorTestSuite) SetupTest() {
 	_, testFile, _, _ := runtime.Caller(0)
 	z.TestDataPath = core.GetTestDataPath(testFile).Unwrap()
@@ -46,10 +50,6 @@ func (z *ZipExtractorTestSuite) TestZipExtractor_Extract_ValidZip_ExtractsExpect
 	assert.Equal(z.T(), nil, configFileErr, "Expected configuration file does not exist.")
 	assert.Equal(z.T(), nil, logConfigFileErr, "Expected log configuration file does not exist.")
 	assert.Equal(z.T(), nil, anotherFileErr, "Expected another file does not exist.")
-}
-
-func TestZipExtractorTestSuite(t *testing.T) {
-	suite.Run(t, new(ZipExtractorTestSuite))
 }
 
 func doesDirectoryExist(directory string) bool {
