@@ -26,7 +26,7 @@ func (z *ZipExtractorTestSuite) TestZipExtractor_Extract_ValidZip_ExtractsExpect
 	uuid := uuid.New().String()
 	packageData, err := os.ReadFile(fmt.Sprintf("%sdummy.zip", z.TestDataPath))
 	if err != nil {
-		assert.Fail(z.T(), fmt.Sprintf("failed to read 'dummy.zip': %z", err))
+		assert.Fail(z.T(), fmt.Sprintf("failed to read 'dummy.zip': %s", err))
 	}
 
 	result := extractor.Extract(packageData, uuid)
