@@ -11,8 +11,8 @@ import (
 
 type FileProviderTestSuite struct {
 	suite.Suite
-	provider          *FileProvider
-	configurationFile string
+	Provider          *FileProvider
+	ConfigurationFile string
 }
 
 func TestFileProviderTestSuite(t *testing.T) {
@@ -22,15 +22,15 @@ func TestFileProviderTestSuite(t *testing.T) {
 func (f *FileProviderTestSuite) SetupTest() {
 	_, testFile, _, _ := runtime.Caller(0)
 	testDataPath := core.GetTestDataPath(testFile).Unwrap()
-	f.provider = NewFileProvider(testDataPath, core.NewCache(time.Hour), time.Hour)
-	f.configurationFile = "application.yaml"
+	f.Provider = NewFileProvider(testDataPath, core.NewCache(time.Hour), time.Hour)
+	f.ConfigurationFile = "application.yaml"
 }
 
 func (f *FileProviderTestSuite) TestFileProvider_Get_ReturnsExpectedValue() {
 	const key = "Example:Inner:Value"
 	const value = 5
 
-	result := f.provider.Get(f.configurationFile, key)
+	result := f.Provider.Get(f.ConfigurationFile, key)
 
 	assert.True(f.T(), result.IsOk())
 	assert.Equal(f.T(), value, result.Unwrap())
@@ -40,7 +40,7 @@ func (f *FileProviderTestSuite) TestFileProvider_Get_RootKey_ReturnsExpectedValu
 	const key = "Root"
 	const value = "yes"
 
-	result := f.provider.Get(f.configurationFile, key)
+	result := f.Provider.Get(f.ConfigurationFile, key)
 
 	assert.True(f.T(), result.IsOk())
 	assert.Equal(f.T(), value, result.Unwrap())
@@ -50,7 +50,7 @@ func (f *FileProviderTestSuite) TestFileProvider_Get_EvenLevelKey_ReturnsExpecte
 	const key = "Example:Yeah"
 	const value = true
 
-	result := f.provider.Get(f.configurationFile, key)
+	result := f.Provider.Get(f.ConfigurationFile, key)
 
 	assert.True(f.T(), result.IsOk())
 	assert.Equal(f.T(), value, result.Unwrap())
