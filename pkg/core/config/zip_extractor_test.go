@@ -6,6 +6,7 @@ import (
 	"github.com/simpleg-eu/cuplan-core/pkg/core"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
+	"go.uber.org/zap"
 	"os"
 	"runtime"
 	"testing"
@@ -14,29 +15,31 @@ import (
 type ZipExtractorTestSuite struct {
 	suite.Suite
 	TestDataPath string
+	Extractor    *ZipExtractor
 }
 
 func (z *ZipExtractorTestSuite) SetupTest() {
 	_, testFile, _, _ := runtime.Caller(0)
 	z.TestDataPath = core.GetTestDataPath(testFile).Unwrap()
+	logger, _ := zap.NewDevelopment()
+	z.Extractor = NewZipExtractor(logger)
 }
 
 func (z *ZipExtractorTestSuite) TestZipExtractor_Extract_ValidZip_ExtractsExpectedFiles() {
-	extractor := NewZipExtractor()
-	uuid := uuid.New().String()
+	targetPath := uuid.New().String()
 	packageData, err := os.ReadFile(fmt.Sprintf("%sdummy.zip", z.TestDataPath))
 	if err != nil {
 		assert.Fail(z.T(), fmt.Sprintf("failed to read 'dummy.zip': %s", err))
 	}
 
-	result := extractor.Extract(packageData, uuid)
+	result := z.Extractor.Extract(packageData, targetPath)
 
 	testDataPathResult := doesDirectoryExist(z.TestDataPath)
-	_, executableErr := os.Stat(fmt.Sprintf("%s/cp-config", uuid))
-	_, configFileErr := os.Stat(fmt.Sprintf("%s/config/config.yaml", uuid))
-	_, logConfigFileErr := os.Stat(fmt.Sprintf("%s/config/log4rs.yaml", uuid))
-	_, anotherFileErr := os.Stat(fmt.Sprintf("%s/config/subfolder/another.yaml", uuid))
-	os.RemoveAll(uuid)
+	_, executableErr := os.Stat(fmt.Sprintf("%s/cp-config", targetPath))
+	_, configFileErr := os.Stat(fmt.Sprintf("%s/config/config.yaml", targetPath))
+	_, logConfigFileErr := os.Stat(fmt.Sprintf("%s/config/log4rs.yaml", targetPath))
+	_, anotherFileErr := os.Stat(fmt.Sprintf("%s/config/subfolder/another.yaml", targetPath))
+	_ = os.RemoveAll(targetPath)
 	assert.True(z.T(), result.IsOk())
 	assert.True(z.T(), testDataPathResult)
 	assert.Equal(z.T(), nil, executableErr, "Expected executable file does not exist.")

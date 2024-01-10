@@ -5,16 +5,21 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/simpleg-eu/cuplan-core/pkg/core"
+	"go.uber.org/zap"
 	"io"
 	"os"
 	"path/filepath"
 )
 
 type ZipExtractor struct {
+	logger *zap.Logger
 }
 
-func NewZipExtractor() *ZipExtractor {
-	return new(ZipExtractor)
+func NewZipExtractor(logger *zap.Logger) *ZipExtractor {
+	extractor := new(ZipExtractor)
+	extractor.logger = logger
+
+	return extractor
 }
 
 func (z ZipExtractor) Extract(packageData []byte, targetPath string) core.Result[core.Empty, core.Error] {
@@ -38,7 +43,12 @@ func (z ZipExtractor) Extract(packageData []byte, targetPath string) core.Result
 			return core.Err[core.Empty, core.Error](*core.NewError(core.ExtractionFailure, fmt.Sprintf("failed to open file within package data: %s", err)))
 		}
 
-		defer rc.Close()
+		defer func(rc io.ReadCloser) {
+			err := rc.Close()
+			if err != nil {
+				z.logger.Warn("Failed to close previously opened file.", zap.String("err", err.Error()))
+			}
+		}(rc)
 
 		if file.FileInfo().IsDir() {
 			continue
@@ -57,7 +67,12 @@ func (z ZipExtractor) Extract(packageData []byte, targetPath string) core.Result
 		if err != nil {
 			return core.Err[core.Empty, core.Error](*core.NewError(core.ExtractionFailure, fmt.Sprintf("failed to create extracted file: %s", err)))
 		}
-		defer extractedFile.Close()
+		defer func(extractedFile *os.File) {
+			err := extractedFile.Close()
+			if err != nil {
+				z.logger.Warn("Failed to close extracted file.", zap.String("err", err.Error()))
+			}
+		}(extractedFile)
 
 		_, err = io.Copy(extractedFile, rc)
 
