@@ -1,5 +1,7 @@
 package core
 
+import "fmt"
+
 type Error struct {
 	errorKind string
 	message   string
@@ -19,4 +21,8 @@ func (e Error) ErrorKind() string {
 
 func (e Error) Message() string {
 	return e.message
+}
+
+func (e Error) String() string {
+	return fmt.Sprintf("%s: %s", e.errorKind, e.message)
 }
