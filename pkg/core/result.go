@@ -1,5 +1,7 @@
 package core
 
+import "fmt"
+
 type Result[OkType any, ErrorType any] struct {
 	ok   OkType
 	err  ErrorType
@@ -20,7 +22,7 @@ func (r Result[OkType, ErrorType]) IsOk() bool {
 
 func (r Result[OkType, ErrorType]) Unwrap() OkType {
 	if !r.isOk {
-		panic("Unwrapped an 'Ok' when result contained an 'Err'.")
+		panic(fmt.Sprintf("Unwrapped an 'Ok' when result contained an 'Err': %v", r.err))
 	}
 
 	return r.ok
@@ -28,7 +30,7 @@ func (r Result[OkType, ErrorType]) Unwrap() OkType {
 
 func (r Result[OkType, ErrorType]) UnwrapErr() ErrorType {
 	if r.isOk {
-		panic("Unwrapped an 'Err' when result contained an 'Ok'.")
+		panic(fmt.Sprintf("Unwrapped an 'Err' when result contained an 'Ok': %v", r.ok))
 	}
 
 	return r.err
