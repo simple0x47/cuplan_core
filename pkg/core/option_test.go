@@ -11,15 +11,15 @@ type OptionTestSuite struct {
 }
 
 func (o *OptionTestSuite) TestOption_IsSome_ReturnsFalseForNone() {
-	assert.False(o.T(), None.IsSome())
+	assert.False(o.T(), None[any]().IsSome())
 }
 
 func (o *OptionTestSuite) TestOption_IsNone_ReturnsTrueForNone() {
-	assert.True(o.T(), None.IsNone())
+	assert.True(o.T(), None[any]().IsNone())
 }
 
 func (o *OptionTestSuite) TestOption_Unwrap_PanicsIfNone() {
-	assert.Panics(o.T(), func() { None.Unwrap() })
+	assert.Panics(o.T(), func() { None[any]().Unwrap() })
 }
 
 func (o *OptionTestSuite) TestOption_Unwrap_ReturnsValueIfSome() {

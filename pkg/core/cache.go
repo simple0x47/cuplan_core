@@ -56,13 +56,13 @@ func (c *Cache) Get(key any) Option[any] {
 	obj, ok := c.cache.Load(key)
 
 	if !ok {
-		return None
+		return None[any]()
 	}
 
 	item, ok := obj.(*CacheItem)
 
 	if !ok {
-		return None
+		return None[any]()
 	}
 
 	return Some(item.value)

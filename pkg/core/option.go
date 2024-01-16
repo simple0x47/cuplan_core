@@ -1,16 +1,13 @@
 package core
 
-// None is a constant representing there is no value for an Option value.
-// DO NOT WRITE TO IT.
-var None = Option[any]{
-	value:    nil,
-	hasValue: false,
-}
-
 // Option represents a value which may or may not have a value.
 type Option[T any] struct {
 	value    T
 	hasValue bool
+}
+
+func None[T any]() Option[T] {
+	return Option[T]{}
 }
 
 // IsSome checks whether the specified Option has a value.
