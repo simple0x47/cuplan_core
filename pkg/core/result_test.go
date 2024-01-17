@@ -50,3 +50,15 @@ func TestResult_IsOk_FalseIfError(t *testing.T) {
 
 	assert.False(t, result.IsOk())
 }
+
+func TestResult_IsErr_TrueIfError(t *testing.T) {
+	result := Err[string, bool](true)
+
+	assert.True(t, result.IsErr())
+}
+
+func TestResult_IsErr_FalseIfOk(t *testing.T) {
+	result := Ok[string, bool]("yes")
+
+	assert.False(t, result.IsErr())
+}

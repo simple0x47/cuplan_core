@@ -20,6 +20,8 @@ func (r Result[OkType, ErrorType]) IsOk() bool {
 	return r.isOk
 }
 
+func (r Result[OkType, ErrorType]) IsErr() bool { return !r.isOk }
+
 func (r Result[OkType, ErrorType]) Unwrap() OkType {
 	if !r.isOk {
 		panic(fmt.Sprintf("Unwrapped an 'Ok' when result contained an 'Err': %v", r.err))
