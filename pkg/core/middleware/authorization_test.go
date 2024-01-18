@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/zap"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"runtime"
@@ -127,6 +128,8 @@ func (a *AuthorizationTestSuite) initializeRouter(issuer string, audience string
 	a.router = chi.NewRouter()
 	a.router.Use(auth.Authorize)
 	a.router.Get(protectedApi, func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(protectedMessage))
+		_, err := w.Write([]byte(protectedMessage))
+
+		log.Printf("failed to write protected message: %v", err)
 	})
 }
