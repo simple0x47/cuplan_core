@@ -1,0 +1,5 @@
+JwksUri: "https://simpleg.eu.auth0.com/.well-known/jwks.json"
+ExpiredTokenSecret: "8a6b9c97-5c45-4147-aa23-b0fa005b031e"
+Issuer: "https://simpleg.eu.auth0.com/"
+Audience: "cp-config"
+ValidTokenSecret: "35a8233a-9a42-4959-ae78-b0fb010f84ed"
