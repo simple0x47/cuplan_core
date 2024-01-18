@@ -33,7 +33,7 @@ func TestBitwardenProvider_Get_InvalidSecretId_ReturnsError(t *testing.T) {
 	result := provider.Get(invalidSecretId)
 
 	assert.False(t, result.IsOk())
-	assert.Equal(t, core.CommandFailure, result.UnwrapErr().ErrorKind())
+	assert.Equal(t, core.CommandFailure, result.UnwrapErr().ErrorKind)
 }
 
 func setup() {

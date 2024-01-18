@@ -67,5 +67,5 @@ func (s *ServerDownloaderTestSuite) TestServerDownloader_Download_Fail_NonExisti
 	result := s.Downloader.Download("https://hereconfigconfiglmao.com", s.Config.Stage, s.Config.Environment, s.Config.Component)
 
 	assert.False(s.T(), result.IsOk())
-	assert.Equal(s.T(), core.ConfigurationRetrievalFailure, result.UnwrapErr().ErrorKind())
+	assert.Equal(s.T(), core.ConfigurationRetrievalFailure, result.UnwrapErr().ErrorKind)
 }
