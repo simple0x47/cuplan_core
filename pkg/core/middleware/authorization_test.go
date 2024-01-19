@@ -72,7 +72,7 @@ func (a *AuthorizationTestSuite) TestAuthorize_InvalidToken_Unauthorized() {
 func (a *AuthorizationTestSuite) TestAuthorize_IssuerMismatchToken_Unauthorized() {
 	a.initializeRouter("lmao", a.configProvider.Get("config.yaml", "Audience").Unwrap().(string))
 	req := httptest.NewRequest("GET", protectedApi, nil)
-	token := secret.NewBitwardenProvider(secret.GetDefaultSecretsManagerAccessToken()).Get(a.configProvider.Get("config.yaml", "ValidTokenSecret").Unwrap().(string)).Unwrap()
+	token := a.getExpiredToken()
 	req.Header.Set("Authorization", token)
 	rec := httptest.NewRecorder()
 
@@ -91,7 +91,7 @@ func (a *AuthorizationTestSuite) TestAuthorize_IssuerMismatchToken_Unauthorized(
 func (a *AuthorizationTestSuite) TestAuthorize_AudienceMismatchToken_Unauthorized() {
 	a.initializeRouter(a.configProvider.Get("config.yaml", "Issuer").Unwrap().(string), "audience?")
 	req := httptest.NewRequest("GET", protectedApi, nil)
-	token := secret.NewBitwardenProvider(secret.GetDefaultSecretsManagerAccessToken()).Get(a.configProvider.Get("config.yaml", "ValidTokenSecret").Unwrap().(string)).Unwrap()
+	token := a.getExpiredToken()
 	req.Header.Set("Authorization", token)
 	rec := httptest.NewRecorder()
 
@@ -110,7 +110,7 @@ func (a *AuthorizationTestSuite) TestAuthorize_AudienceMismatchToken_Unauthorize
 func (a *AuthorizationTestSuite) TestAuthorize_ValidToken_Authorized() {
 	a.initializeRouter(a.configProvider.Get("config.yaml", "Issuer").Unwrap().(string), a.configProvider.Get("config.yaml", "Audience").Unwrap().(string))
 	req := httptest.NewRequest("GET", protectedApi, nil)
-	token := secret.NewBitwardenProvider(secret.GetDefaultSecretsManagerAccessToken()).Get(a.configProvider.Get("config.yaml", "ValidTokenSecret").Unwrap().(string)).Unwrap()
+	token := a.getValidToken()
 	req.Header.Set("Authorization", token)
 	rec := httptest.NewRecorder()
 
@@ -119,6 +119,37 @@ func (a *AuthorizationTestSuite) TestAuthorize_ValidToken_Authorized() {
 
 	assert.Equal(a.T(), http.StatusOK, rec.Code)
 	assert.Equal(a.T(), protectedMessage, response)
+}
+
+func (a *AuthorizationTestSuite) TestExtractToken_NoToken_Error() {
+	req := httptest.NewRequest("GET", protectedApi, nil)
+
+	result := ExtractToken(req)
+
+	assert.True(a.T(), result.IsErr())
+	assert.Equal(a.T(), core.NotFound, result.UnwrapErr().ErrorKind)
+	assert.Contains(a.T(), result.UnwrapErr().Message, "could not find token within request")
+}
+
+func (a *AuthorizationTestSuite) TestExtractToken_MalformedToken_Error() {
+	req := httptest.NewRequest("GET", protectedApi, nil)
+	req.Header.Set("Authorization", "Bearer malformedToken")
+
+	result := ExtractToken(req)
+
+	assert.True(a.T(), result.IsErr())
+	assert.Equal(a.T(), core.InvalidToken, result.UnwrapErr().ErrorKind)
+	assert.Contains(a.T(), result.UnwrapErr().Message, "failed to parse token: ")
+}
+
+func (a *AuthorizationTestSuite) TestExtractToken_ValidToken_Ok() {
+	req := httptest.NewRequest("GET", protectedApi, nil)
+	token := a.getValidToken()
+	req.Header.Set("Authorization", token)
+
+	result := ExtractToken(req)
+
+	assert.True(a.T(), result.IsOk())
 }
 
 func (a *AuthorizationTestSuite) initializeRouter(issuer string, audience string) {
@@ -132,4 +163,12 @@ func (a *AuthorizationTestSuite) initializeRouter(issuer string, audience string
 
 		log.Printf("failed to write protected message: %v", err)
 	})
+}
+
+func (a *AuthorizationTestSuite) getExpiredToken() string {
+	return secret.NewBitwardenProvider(secret.GetDefaultSecretsManagerAccessToken()).Get(a.configProvider.Get("config.yaml", "ValidTokenSecret").Unwrap().(string)).Unwrap()
+}
+
+func (a *AuthorizationTestSuite) getValidToken() string {
+	return secret.NewBitwardenProvider(secret.GetDefaultSecretsManagerAccessToken()).Get(a.configProvider.Get("config.yaml", "ValidTokenSecret").Unwrap().(string)).Unwrap()
 }

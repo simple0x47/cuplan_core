@@ -28,6 +28,36 @@ func NewAuthorization(logger *zap.Logger, jwks *jwk.Set, audience string, issuer
 	return a
 }
 
+func ExtractToken(r *http.Request) core.Result[jwt.Token, core.Error] {
+	str := extractBearerToken(r)
+
+	if str.IsNone() {
+		return core.Err[jwt.Token, core.Error](*core.NewError(core.NotFound, "could not find token within request"))
+	}
+
+	token, err := jwt.ParseString(str.Unwrap())
+
+	if err != nil {
+		return core.Err[jwt.Token, core.Error](*core.NewError(core.InvalidToken, fmt.Sprintf("failed to parse token: %v", err)))
+	}
+
+	return core.Ok[jwt.Token, core.Error](token)
+}
+
+func extractBearerToken(r *http.Request) core.Option[string] {
+	header := r.Header.Get("Authorization")
+
+	if len(header) == 0 {
+		return core.None[string]()
+	}
+
+	if !strings.HasPrefix(header, "Bearer ") {
+		return core.None[string]()
+	}
+
+	return core.Some[string](strings.TrimPrefix(header, "Bearer "))
+}
+
 func (a *Authorization) Authorize(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		optionalToken := extractBearerToken(r)
@@ -55,20 +85,6 @@ func (a *Authorization) Authorize(next http.Handler) http.Handler {
 
 		next.ServeHTTP(w, r)
 	})
-}
-
-func extractBearerToken(r *http.Request) core.Option[string] {
-	header := r.Header.Get("Authorization")
-
-	if len(header) == 0 {
-		return core.None[string]()
-	}
-
-	if !strings.HasPrefix(header, "Bearer ") {
-		return core.None[string]()
-	}
-
-	return core.Some[string](strings.TrimPrefix(header, "Bearer "))
 }
 
 func (a *Authorization) writeInvalidTokenError(message string, w http.ResponseWriter) {
