@@ -28,7 +28,43 @@ func NewAuthorization(logger *zap.Logger, jwks *jwk.Set, audience string, issuer
 	return a
 }
 
-func ExtractToken(r *http.Request) core.Result[jwt.Token, core.Error] {
+func HasTokenPermissionTo(r *http.Request, permission string) core.Result[bool, core.Error] {
+	result := extractToken(r)
+
+	if result.IsErr() {
+		return core.Err[bool, core.Error](result.UnwrapErr())
+	}
+
+	token := result.Unwrap()
+
+	objects, exists := token.Get("permissions")
+
+	if !exists {
+		return core.Ok[bool, core.Error](false)
+	}
+
+	objs, ok := objects.([]any)
+
+	if !ok {
+		return core.Err[bool, core.Error](*core.NewError(core.InvalidToken, "failed to read 'permissions' claim as a slice"))
+	}
+
+	for _, object := range objs {
+		tokenPermission, ok := object.(string)
+
+		if !ok {
+			return core.Err[bool, core.Error](*core.NewError(core.InvalidToken, fmt.Sprintf("expected 'permissions' to be a slice of strings but it contains: %v", object)))
+		}
+
+		if tokenPermission == permission {
+			return core.Ok[bool, core.Error](true)
+		}
+	}
+
+	return core.Ok[bool, core.Error](false)
+}
+
+func extractToken(r *http.Request) core.Result[jwt.Token, core.Error] {
 	str := extractBearerToken(r)
 
 	if str.IsNone() {
