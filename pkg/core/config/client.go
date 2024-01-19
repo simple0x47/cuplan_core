@@ -2,7 +2,7 @@ package config
 
 import (
 	"fmt"
-	"github.com/simpleg-eu/cuplan-core/pkg/core"
+	"github.com/simpleg-eu/cuplan_core/pkg/core"
 	"go.uber.org/zap"
 	"os"
 	"time"

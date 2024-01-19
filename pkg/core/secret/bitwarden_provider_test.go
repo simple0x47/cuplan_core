@@ -1,7 +1,7 @@
 package secret
 
 import (
-	"github.com/simpleg-eu/cuplan-core/pkg/core"
+	"github.com/simpleg-eu/cuplan_core/pkg/core"
 	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"

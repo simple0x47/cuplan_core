@@ -1,6 +1,6 @@
 package config
 
-import "github.com/simpleg-eu/cuplan-core/pkg/core"
+import "github.com/simpleg-eu/cuplan_core/pkg/core"
 
 // Extractor
 // Interface which provides a facility to extract a configuration package.

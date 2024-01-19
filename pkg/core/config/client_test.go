@@ -2,7 +2,7 @@ package config
 
 import (
 	"github.com/google/uuid"
-	"github.com/simpleg-eu/cuplan-core/pkg/core"
+	"github.com/simpleg-eu/cuplan_core/pkg/core"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"

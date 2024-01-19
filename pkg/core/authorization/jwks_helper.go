@@ -3,7 +3,7 @@ package authorization
 import (
 	"fmt"
 	"github.com/lestrrat-go/jwx/jwk"
-	"github.com/simpleg-eu/cuplan-core/pkg/core"
+	"github.com/simpleg-eu/cuplan_core/pkg/core"
 	"io"
 	"net/http"
 )

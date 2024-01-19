@@ -1,6 +1,6 @@
 package config
 
-import "github.com/simpleg-eu/cuplan-core/pkg/core"
+import "github.com/simpleg-eu/cuplan_core/pkg/core"
 
 // Provider provides a configuration value. I know, crazy, huh?
 type Provider interface {

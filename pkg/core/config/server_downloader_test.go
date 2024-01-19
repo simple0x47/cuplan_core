@@ -2,8 +2,8 @@ package config
 
 import (
 	"fmt"
-	"github.com/simpleg-eu/cuplan-core/pkg/core"
-	"github.com/simpleg-eu/cuplan-core/pkg/core/secret"
+	"github.com/simpleg-eu/cuplan_core/pkg/core"
+	"github.com/simpleg-eu/cuplan_core/pkg/core/secret"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/zap"
