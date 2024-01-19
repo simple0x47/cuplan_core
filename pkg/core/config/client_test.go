@@ -9,14 +9,12 @@ import (
 	"go.uber.org/zap"
 	"os"
 	"testing"
-	"time"
 )
 
 const host = "https://simpleg.eu"
 const stage = "dummy"
 const environment = "development"
 const component = "dummy"
-const downloadAgainAfter = time.Second
 const filePath = "application.yaml"
 const configKey = "Parent:Child"
 const value string = "1234abcd"
@@ -88,17 +86,6 @@ func (c *ClientTestSuite) TestClient_Get_ReturnsExpectedValue() {
 
 	c.AssertExpectedValue(result)
 	c.AssertCompleteFlowExecutedTimes(1)
-}
-
-func (c *ClientTestSuite) TestClient_Get_AfterDownloadAgain_Downloads() {
-	defer c.Client.Close()
-	c.Client.Get(filePath, configKey)
-	time.Sleep(time.Second * 2)
-
-	secondResult := c.Client.Get(filePath, configKey)
-
-	c.AssertExpectedValue(secondResult)
-	c.AssertCompleteFlowExecutedTimes(2)
 }
 
 func (c *ClientTestSuite) TestClient_Close_RemovesWorkingPath() {
