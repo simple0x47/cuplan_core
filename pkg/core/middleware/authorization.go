@@ -31,7 +31,7 @@ func NewAuthorization(logger *zap.Logger, jwks *jwk.Set, audience string, issuer
 // HasRequestPermissionTo writes to the response if the request does not have the required permission.
 // Returns true if the request has the required permission, otherwise it returns false (also happens when an error occurs).
 func HasRequestPermissionTo(w http.ResponseWriter, r *http.Request, logger *zap.Logger, permission string) bool {
-	permissionResult := hasTokenPermissionTo(r, "organization:create")
+	permissionResult := hasTokenPermissionTo(r, permission)
 
 	if permissionResult.IsErr() {
 		w.WriteHeader(http.StatusBadRequest)
