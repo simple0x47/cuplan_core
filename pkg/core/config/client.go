@@ -5,22 +5,20 @@ import (
 	"github.com/simpleg-eu/cuplan_core/pkg/core"
 	"go.uber.org/zap"
 	"os"
-	"time"
 )
 
 // Client provides a way to obtain configurations from remote locations.
+// It's the Client's obligation to provide a way to delete the working path.
 type Client struct {
-	logger             *zap.Logger
-	host               string
-	stage              string
-	environment        string
-	component          string
-	workingPath        string
-	downloadAgainAfter time.Duration
-	downloader         Downloader
-	extractor          Extractor
-	provider           Provider
-	lastDownload       time.Time
+	logger      *zap.Logger
+	host        string
+	stage       string
+	environment string
+	component   string
+	workingPath string
+	downloader  Downloader
+	extractor   Extractor
+	provider    Provider
 }
 
 // NewClient creates a new instance of Client.
@@ -30,7 +28,6 @@ func NewClient(logger *zap.Logger,
 	environment string,
 	component string,
 	workingPath string,
-	downloadAgainAfter time.Duration,
 	downloader Downloader,
 	extractor Extractor,
 	provider Provider) *Client {
@@ -42,11 +39,9 @@ func NewClient(logger *zap.Logger,
 	client.environment = environment
 	client.component = component
 	client.workingPath = workingPath
-	client.downloadAgainAfter = downloadAgainAfter
 	client.downloader = downloader
 	client.extractor = extractor
 	client.provider = provider
-	client.lastDownload = time.Unix(0, 0)
 
 	return client
 }
@@ -62,9 +57,7 @@ func (c *Client) Close() {
 // Get retrieves the configuration located within the specified file and at the specified key.
 // The different levels are separated by ':', i.e. "Root:Parent:Example".
 func (c *Client) Get(filePath string, key string) core.Result[any, core.Error] {
-	timeSinceLastDownload := time.Now().Sub(c.lastDownload)
-
-	if timeSinceLastDownload > c.downloadAgainAfter || !_doesDirectoryExist(c.workingPath) {
+	if !_doesDirectoryExist(c.workingPath) {
 		initResult := c.initializeConfig()
 
 		if !initResult.IsOk() {
@@ -87,7 +80,6 @@ func (c *Client) initializeConfig() core.Result[core.Empty, core.Error] {
 		return core.Err[core.Empty, core.Error](downloadResult.UnwrapErr())
 	}
 
-	c.lastDownload = time.Now()
 	c.provider.CleanCache()
 	return c.extractor.Extract(downloadResult.Unwrap(), c.workingPath)
 }

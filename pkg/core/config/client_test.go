@@ -74,7 +74,7 @@ func (c *ClientTestSuite) SetupTest() {
 	c.Extractor = new(MockExtractor)
 	c.Provider = new(MockProvider)
 	logger, _ := zap.NewDevelopment()
-	c.Client = NewClient(logger, host, stage, environment, component, c.WorkingPath, downloadAgainAfter, c.Downloader, c.Extractor, c.Provider)
+	c.Client = NewClient(logger, host, stage, environment, component, c.WorkingPath, c.Downloader, c.Extractor, c.Provider)
 
 	c.Downloader.On("Download", host, stage, environment, component).Return(core.Ok[[]byte, core.Error](c.PackageData))
 	c.Extractor.On("Extract", c.PackageData, c.WorkingPath).Return()
