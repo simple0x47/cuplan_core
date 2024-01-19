@@ -156,7 +156,7 @@ func (a *AuthorizationTestSuite) TestHasTokenPermissionTo_InvalidToken_Error() {
 	req := httptest.NewRequest("GET", protectedApi, nil)
 	req.Header.Set("Authorization", "Bearer invalidToken")
 
-	result := HasTokenPermissionTo(req, "some:thing")
+	result := hasTokenPermissionTo(req, "some:thing")
 
 	assert.True(a.T(), result.IsErr())
 	assert.Equal(a.T(), core.InvalidToken, result.UnwrapErr().ErrorKind)
@@ -166,7 +166,7 @@ func (a *AuthorizationTestSuite) TestHasTokenPermissionTo_NoPermissionsToken_Fal
 	req := httptest.NewRequest("GET", protectedApi, nil)
 	req.Header.Set("Authorization", a.getValidToken())
 
-	result := HasTokenPermissionTo(req, "some:thing")
+	result := hasTokenPermissionTo(req, "some:thing")
 
 	assert.True(a.T(), result.IsOk())
 	assert.False(a.T(), result.Unwrap())
@@ -176,7 +176,7 @@ func (a *AuthorizationTestSuite) TestHasTokenPermissionTo_StringPermission_Error
 	req := httptest.NewRequest("GET", protectedApi, nil)
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", a.configProvider.Get("config.yaml", "StringPermissionToken").Unwrap()))
 
-	result := HasTokenPermissionTo(req, "some:thing")
+	result := hasTokenPermissionTo(req, "some:thing")
 
 	assert.True(a.T(), result.IsErr())
 	assert.Equal(a.T(), core.InvalidToken, result.UnwrapErr().ErrorKind)
@@ -186,7 +186,7 @@ func (a *AuthorizationTestSuite) TestHasTokenPermissionTo_ExistingPermission_Tru
 	req := httptest.NewRequest("GET", protectedApi, nil)
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", a.configProvider.Get("config.yaml", "ArrayPermissionsToken").Unwrap()))
 
-	result := HasTokenPermissionTo(req, "some:thing")
+	result := hasTokenPermissionTo(req, "some:thing")
 
 	assert.True(a.T(), result.IsOk())
 	assert.True(a.T(), result.Unwrap())

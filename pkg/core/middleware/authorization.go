@@ -28,7 +28,33 @@ func NewAuthorization(logger *zap.Logger, jwks *jwk.Set, audience string, issuer
 	return a
 }
 
-func HasTokenPermissionTo(r *http.Request, permission string) core.Result[bool, core.Error] {
+// HasRequestPermissionTo writes to the response if the request does not have the required permission.
+// Returns true if the request has the required permission, otherwise it returns false (also happens when an error occurs).
+func HasRequestPermissionTo(w http.ResponseWriter, r *http.Request, logger *zap.Logger, permission string) bool {
+	permissionResult := hasTokenPermissionTo(r, "organization:create")
+
+	if permissionResult.IsErr() {
+		w.WriteHeader(http.StatusBadRequest)
+
+		writeError(w, logger, permissionResult.UnwrapErr())
+
+		return false
+	}
+
+	if !permissionResult.Unwrap() {
+		w.WriteHeader(http.StatusUnauthorized)
+
+		missingPermission := core.NewError(core.MissingPermission, fmt.Sprintf("token is missing the '%s' permission", permission))
+
+		writeError(w, logger, *missingPermission)
+
+		return false
+	}
+
+	return true
+}
+
+func hasTokenPermissionTo(r *http.Request, permission string) core.Result[bool, core.Error] {
 	result := extractToken(r)
 
 	if result.IsErr() {
@@ -62,6 +88,20 @@ func HasTokenPermissionTo(r *http.Request, permission string) core.Result[bool, 
 	}
 
 	return core.Ok[bool, core.Error](false)
+}
+
+func writeError(w http.ResponseWriter, logger *zap.Logger, error core.Error) {
+	errorBytes, err := json.Marshal(error)
+
+	if err != nil {
+		logger.Info(fmt.Sprintf("failed to json marshal error: %v", err))
+	}
+
+	_, err = w.Write(errorBytes)
+
+	if err != nil {
+		logger.Info(fmt.Sprintf("failed to write error as response: %v", err))
+	}
 }
 
 func extractToken(r *http.Request) core.Result[jwt.Token, core.Error] {
