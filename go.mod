@@ -1,4 +1,4 @@
-module github.com/simpleg-eu/cuplan-core
+module github.com/simpleg-eu/cuplan_core
 
 go 1.21
 
