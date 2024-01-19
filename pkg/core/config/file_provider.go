@@ -63,6 +63,10 @@ func (f *FileProvider) Get(filePath string, key string) core.Result[any, core.Er
 	return getValueFromKeys[any](key, config)
 }
 
+func (f *FileProvider) CleanCache() {
+	f.cache.Clear()
+}
+
 func getValueFromKeys[T any](key string, object map[string]any) core.Result[T, core.Error] {
 	subKeys := strings.Split(key, keySeparator)
 
